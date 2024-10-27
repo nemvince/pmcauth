@@ -11,7 +11,7 @@ public class HTTPClient {
     public static HttpClient client;
 
     public HTTPClient() {
-        this.client = HttpClient.newBuilder()
+        client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
     }

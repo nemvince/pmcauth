@@ -1,8 +1,5 @@
 package lol.petrik.pmcauth;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 
 import com.velocitypowered.api.event.Subscribe;
