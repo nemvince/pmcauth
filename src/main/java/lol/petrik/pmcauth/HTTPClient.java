@@ -8,27 +8,27 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
 public class HTTPClient {
-    public static HttpClient client;
+  public static HttpClient client;
 
-    public HTTPClient() {
-        client = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(10))
-                .build();
-    }
+  public HTTPClient() {
+    client = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(10))
+        .build();
+  }
 
-    public CompletableFuture<String> get(String url) {
-        return client.sendAsync(HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .build(), HttpResponse.BodyHandlers.ofString())
-                .thenApply(HttpResponse::body);
-    }
+  public CompletableFuture<String> get(String url) {
+    return client.sendAsync(HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .GET()
+            .build(), HttpResponse.BodyHandlers.ofString())
+        .thenApply(HttpResponse::body);
+  }
 
-    public CompletableFuture<String> post(String url, String body) {
-        return client.sendAsync(HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .POST(HttpRequest.BodyPublishers.ofString(body))
-                .build(), HttpResponse.BodyHandlers.ofString())
-                .thenApply(HttpResponse::body);
-    }
+  public CompletableFuture<String> post(String url, String body) {
+    return client.sendAsync(HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .POST(HttpRequest.BodyPublishers.ofString(body))
+            .build(), HttpResponse.BodyHandlers.ofString())
+        .thenApply(HttpResponse::body);
+  }
 }
