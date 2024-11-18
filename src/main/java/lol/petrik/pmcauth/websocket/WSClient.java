@@ -1,10 +1,9 @@
-package lol.petrik.pmcauth.Websocket;
+package lol.petrik.pmcauth.websocket;
 
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 import lol.petrik.pmcauth.PMCAuth;
 import lol.petrik.pmcauth.PlayerLock;
-import lol.petrik.pmcauth.WSAuthResult;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -43,8 +42,8 @@ public class WSClient {
     pmcAuth.getPlayerStatus().put(obj.mc_username, obj);
     PlayerLock playerLock = pmcAuth.getWaitingPlayers().get(obj.mc_username);
     if (playerLock != null) {
-      Lock lock = playerLock.getLock();
-      Condition condition = playerLock.getCondition();
+      Lock lock = playerLock.lock();
+      Condition condition = playerLock.condition();
       lock.lock();
       try {
         condition.signal();

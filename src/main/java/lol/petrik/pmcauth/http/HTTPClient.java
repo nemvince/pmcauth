@@ -1,4 +1,4 @@
-package lol.petrik.pmcauth;
+package lol.petrik.pmcauth.http;
 
 import java.net.URI;
 import java.net.http.HttpClient;

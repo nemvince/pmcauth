@@ -1,4 +1,4 @@
-package lol.petrik.pmcauth.Limbo;
+package lol.petrik.pmcauth.limbo;
 import java.util.Collection;
 import java.util.Collections;
 

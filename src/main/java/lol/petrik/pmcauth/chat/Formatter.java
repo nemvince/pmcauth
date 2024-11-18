@@ -1,10 +1,11 @@
-package lol.petrik.pmcauth.Chat;
+package lol.petrik.pmcauth.chat;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
 public class Formatter {
+  @SuppressWarnings("SameParameterValue")
   private static Component wrapWithBrackets(Component input) {
     Component leftBracket = Component.text("[")
         .color(NamedTextColor.WHITE)

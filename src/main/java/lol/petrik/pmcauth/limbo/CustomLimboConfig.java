@@ -1,4 +1,4 @@
-package lol.petrik.pmcauth.Limbo;
+package lol.petrik.pmcauth.limbo;
 
 import com.google.gson.Gson;
 import ua.nanit.limbo.configuration.LimboConfig;
