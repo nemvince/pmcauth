@@ -2,9 +2,9 @@ package lol.petrik.pmcauth.Websocket;
 
 import com.google.gson.Gson;
 import jakarta.websocket.*;
-import lol.petrik.pmcauth.WSAuthResult;
 import lol.petrik.pmcauth.PMCAuth;
 import lol.petrik.pmcauth.PlayerLock;
+import lol.petrik.pmcauth.WSAuthResult;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -38,22 +38,19 @@ public class WSClient {
     Gson gson = new Gson();
     WSAuthResult obj = gson.fromJson(message, WSAuthResult.class);
 
-    logger.info("Received message: {}", obj);
+    logger.info("Received message: {}: {}", obj.mc_username, obj.event);
 
-    if ("failedAuthorization".equals(obj.event)) {
-      pmcAuth.getPlayerStatus().put(obj.mc_username, new WSAuthResult(obj.event, obj.reason));
-      PlayerLock playerLock = pmcAuth.getWaitingPlayers().get(obj.mc_username);
-      if (playerLock != null) {
-        Lock lock = playerLock.getLock();
-        Condition condition = playerLock.getCondition();
-        lock.lock();
-        try {
-          condition.signal();
-        } finally {
-          lock.unlock();
-        }
+    pmcAuth.getPlayerStatus().put(obj.mc_username, obj);
+    PlayerLock playerLock = pmcAuth.getWaitingPlayers().get(obj.mc_username);
+    if (playerLock != null) {
+      Lock lock = playerLock.getLock();
+      Condition condition = playerLock.getCondition();
+      lock.lock();
+      try {
+        condition.signal();
+      } finally {
+        lock.unlock();
       }
-      logger.error("Authorization failed for player.");
     }
   }
 

@@ -16,20 +16,18 @@ public class HTTPClient {
         .build();
   }
 
-  public CompletableFuture<String> get(String url) {
+  public CompletableFuture<HttpResponse<String>> get(String url) {
     return client.sendAsync(HttpRequest.newBuilder()
-            .uri(URI.create(url))
-            .GET()
-            .build(), HttpResponse.BodyHandlers.ofString())
-        .thenApply(HttpResponse::body);
+        .uri(URI.create(url))
+        .GET()
+        .build(), HttpResponse.BodyHandlers.ofString());
   }
 
-  public CompletableFuture<String> post(String url, String body) {
+  public CompletableFuture<HttpResponse<String>> post(String url, String body) {
     return client.sendAsync(HttpRequest.newBuilder()
-            .uri(URI.create(url))
-            .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(body))
-            .build(), HttpResponse.BodyHandlers.ofString())
-        .thenApply(HttpResponse::body);
+        .uri(URI.create(url))
+        .header("Content-Type", "application/json")
+        .POST(HttpRequest.BodyPublishers.ofString(body))
+        .build(), HttpResponse.BodyHandlers.ofString());
   }
 }

@@ -3,6 +3,7 @@ package lol.petrik.pmcauth;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
@@ -40,6 +41,7 @@ public class PMCAuth {
   private final String name;
   private final ConcurrentHashMap<String, PlayerLock> waitingPlayers = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, WSAuthResult> playerStatus = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, Boolean> authorizedPlayers = new ConcurrentHashMap<>();
   private final HTTPClient httpClient = new HTTPClient();
   private final LimboServer limbo;
   private final PMCAuth instance;
@@ -88,6 +90,11 @@ public class PMCAuth {
     Player player = event.getPlayer();
     logger.info("Player {} is trying to connect.", player.getUsername());
 
+    if (authorizedPlayers.getOrDefault(player.getUsername(), false)) {
+      logger.info("Player {} is already authorized.", player.getUsername());
+      return;
+    }
+
     if (server.getServer("limbo").isEmpty()) {
       logger.error("Limbo server is not present.");
       event.setResult(ServerPreConnectEvent.ServerResult.denied());
@@ -99,16 +106,19 @@ public class PMCAuth {
 
     // send http post
     Gson gson = new Gson();
-    // { mc_username: "player.getUsername()" }
     String json = gson.toJson(Collections.singletonMap("mc_username", player.getUsername()));
-    httpClient.post("http://10.0.0.136:3000/plugin/auth", json)
-    player.sendMessage(Formatter.info("Szia, küldtem egy üzenetet Discordon, kérlek hagy jóvá a bélépést!"));
+    httpClient.post("http://10.0.0.136:3000/plugin/auth", json).thenAccept(response -> {
+      String respBody = response.body();
+      HTTPAuthResult result = gson.fromJson(respBody, HTTPAuthResult.class);
+      player.sendMessage(Formatter.info("Kérlek a Discord szerveren küldd el a következő kódot: " + result.code));
+      logger.info("Player {} has been sent a code: {}", player.getUsername(), result.code);
+    });
 
     // start authorization
-    new Thread(() -> handlePlayerAuthorization(player, event, code)).start();
+    new Thread(() -> handlePlayerAuthorization(player, event)).start();
   }
 
-  public void handlePlayerAuthorization(Player player, ServerPreConnectEvent event, String code) {
+  public void handlePlayerAuthorization(Player player, ServerPreConnectEvent event) {
     Lock lock = new ReentrantLock();
     Condition condition = lock.newCondition();
     waitingPlayers.put(player.getUsername(), new PlayerLock(lock, condition));
@@ -125,9 +135,16 @@ public class PMCAuth {
           logger.info("Player {} failed to authenticate: {}", player.getUsername(), status.reason);
           event.setResult(ServerPreConnectEvent.ServerResult.denied());
           player.disconnect(Formatter.error(status.reason));
-        } else {
+        } else if (Objects.equals(status.event, "doneAuthorization")) {
           logger.info("Player {} successfully authenticated", player.getUsername());
-          player.sendMessage(Formatter.info("Sikeresen azonosítottalak, most már beléphetsz!"));
+          player.sendMessage(Formatter.info("Sikeresen azonosítottalak, jó játékot!"));
+          authorizedPlayers.put(player.getUsername(), true);
+          if (server.getServer("paper").isEmpty()) {
+            logger.error("Paper server is not present.");
+            event.setResult(ServerPreConnectEvent.ServerResult.denied());
+            player.disconnect(Formatter.error("Szerverhiba!"));
+          }
+          player.createConnectionRequest(server.getServer("paper").get()).fireAndForget();
         }
       }
     } catch (InterruptedException e) {
@@ -137,6 +154,13 @@ public class PMCAuth {
       waitingPlayers.remove(player.getUsername());
       playerStatus.remove(player.getUsername());
     }
+  }
+
+  @Subscribe
+  public void onPlayerDisconnect(DisconnectEvent event) {
+    Player player = event.getPlayer();
+    authorizedPlayers.remove(player.getUsername());
+    logger.info("Player {} has been unauthorized.", player.getUsername());
   }
 
   public void onLoad() {
