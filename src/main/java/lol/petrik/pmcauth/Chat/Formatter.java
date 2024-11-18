@@ -3,7 +3,6 @@ package lol.petrik.pmcauth.Chat;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.w3c.dom.Text;
 
 public class Formatter {
   private static Component wrapWithBrackets(Component input) {
