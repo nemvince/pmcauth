@@ -27,6 +27,10 @@ dependencies {
     compileOnly("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
     annotationProcessor("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
     implementation("com.github.bivashy.NanoLimboPlugin:api:1.0.11")
+    implementation('jakarta.websocket:jakarta.websocket-api:2.2.0')
+    implementation('org.glassfish.tyrus:tyrus-client:2.2.0')
+    implementation('org.glassfish.tyrus:tyrus-container-grizzly-client:2.2.0')
+
 }
 
 def targetJavaVersion = 21
@@ -54,3 +58,15 @@ sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
 
 project.idea.project.settings.taskTriggers.afterSync generateTemplates
 project.eclipse.synchronizationTasks(generateTemplates)
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude 'META-INF/*'
+    }
+    manifest {
+        attributes 'Main-Class': 'lol.petrik.pmcauth.PMCAuth'
+    }
+}
