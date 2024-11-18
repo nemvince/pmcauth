@@ -17,11 +17,16 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
+    maven {
+        name = "nanolimbo-repo"
+        url = "https://jitpack.io"
+    }
 }
 
 dependencies {
     compileOnly("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
     annotationProcessor("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
+    implementation("com.github.bivashy.NanoLimboPlugin:api:1.0.11")
 }
 
 def targetJavaVersion = 21

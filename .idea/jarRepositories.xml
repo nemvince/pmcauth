@@ -26,5 +26,15 @@
       <option name="name" value="sonatype" />
       <option name="url" value="https://oss.sonatype.org/content/groups/public/" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="elytrium-repo" />
+      <option name="name" value="elytrium-repo" />
+      <option name="url" value="https://maven.elytrium.net/repo/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="nanolimbo-repo" />
+      <option name="name" value="nanolimbo-repo" />
+      <option name="url" value="https://jitpack.io" />
+    </remote-repository>
   </component>
 </project>

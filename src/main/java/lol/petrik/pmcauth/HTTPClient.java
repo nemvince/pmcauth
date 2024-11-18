@@ -27,6 +27,7 @@ public class HTTPClient {
   public CompletableFuture<String> post(String url, String body) {
     return client.sendAsync(HttpRequest.newBuilder()
             .uri(URI.create(url))
+            .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(body))
             .build(), HttpResponse.BodyHandlers.ofString())
         .thenApply(HttpResponse::body);

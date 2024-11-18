@@ -1,37 +1,54 @@
 package lol.petrik.pmcauth;
 
-import java.nio.file.Path;
+import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.util.Collection;
+import java.util.Map;
 
+import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
+import com.velocitypowered.api.proxy.server.ServerInfo;
+import lol.petrik.pmcauth.Chat.Formatter;
+import lol.petrik.pmcauth.Limbo.CustomCommandHandler;
+import lol.petrik.pmcauth.Limbo.CustomLimboConfig;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.slf4j.Logger;
 
 import com.google.inject.Inject;
 import com.velocitypowered.api.plugin.Plugin;
-import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import ua.nanit.limbo.configuration.LimboConfig;
+import ua.nanit.limbo.server.Command;
+import ua.nanit.limbo.server.CommandHandler;
+import ua.nanit.limbo.server.LimboServer;
 
 @Plugin(id = "pmcauth", name = "PMCAuth", version = BuildConstants.VERSION, authors = {"nemvince"})
 public class PMCAuth {
-  private static PMCAuth instance;
 
   private final ProxyServer server;
   private final Logger logger;
-  private final Path dataDirectory;
   private final String name;
+
   private final HTTPClient httpClient = new HTTPClient();
 
-  @Inject
-  public PMCAuth(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
-    instance = this;
+  private final LimboServer limbo;
 
+  @Inject
+  public PMCAuth(ProxyServer server, Logger logger) {
     this.server = server;
     this.logger = logger;
-    this.dataDirectory = dataDirectory;
+
+    LimboConfig limboConfig = new CustomLimboConfig();
+    CommandHandler<Command> limboCommandHandler = new CustomCommandHandler();
+
+    this.limbo = new LimboServer(limboConfig, limboCommandHandler, getClass().getClassLoader());
 
     this.name = this.getClass().getAnnotation(Plugin.class).name();
 
@@ -51,25 +68,43 @@ public class PMCAuth {
   @Subscribe
   public void onServerProxyPreConnectionEvent(ServerPreConnectEvent event) {
     Player player = event.getPlayer();
+    logger.info("Player {} is trying to connect.", player.getUsername());
 
-    event.setResult(ServerPreConnectEvent.ServerResult.denied());
+    // put player in limbo
+    RegisteredServer limboServer = server.getServer("limbo").get();
+    event.setResult(ServerPreConnectEvent.ServerResult.allowed(limboServer));
 
-    httpClient.get("http://10.0.0.100/test.txt" + player.getUsername()).thenAccept(response -> {
-      Component responseComponent = Component.text(response);
-      player.disconnect(responseComponent);
-    });
+    logger.info("Player {} is now in limbo.", player.getUsername());
+    // send player chat message
+
+    player.sendMessage(Formatter.info("Szia, küldtem egy üzenetet Discordon, kérlek hagy jóvá a bélépést!"));
   }
 
   public void onLoad() {
-    System.out.println(this.name + " loaded.");
-
+    logger.info("{} loaded", this.name);
   }
 
   public void onEnable() {
-    System.out.println(this.name + " enabled");
+    try {
+      this.limbo.start();
+
+      ServerInfo limboServerInfo = new ServerInfo("limbo", new InetSocketAddress("localhost", 60000));
+      server.registerServer(limboServerInfo);
+      logger.info("Limbo server started and registered");
+    } catch (Exception e) {
+      logger.error("Error while starting Limbo: {}", e.getMessage());
+      e.printStackTrace();
+    }
+    logger.info("{} enabled", this.name);
   }
 
   public void onDisable() {
-    System.out.println(this.name + " disabled");
+    try {
+      this.limbo.stop();
+    } catch (Exception e) {
+      logger.error("Error while stopping Limbo: {}", e.getMessage());
+      e.printStackTrace();
+    }
+    logger.info("{} disabled", this.name);
   }
 }

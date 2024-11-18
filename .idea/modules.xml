@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/PMCAuth.main.iml" filepath="$PROJECT_DIR$/.idea/modules/PMCAuth.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/lol.petrik.PMCAuth.main.iml" filepath="$PROJECT_DIR$/.idea/modules/lol.petrik.PMCAuth.main.iml" />
     </modules>
   </component>
 </project>
