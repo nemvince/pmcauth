@@ -1,11 +1,7 @@
 package lol.petrik.pmcauth;
 
-import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
-import java.util.Collection;
-import java.util.Map;
 
-import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -16,9 +12,6 @@ import com.velocitypowered.api.proxy.server.ServerInfo;
 import lol.petrik.pmcauth.Chat.Formatter;
 import lol.petrik.pmcauth.Limbo.CustomCommandHandler;
 import lol.petrik.pmcauth.Limbo.CustomLimboConfig;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.slf4j.Logger;
 
 import com.google.inject.Inject;
@@ -71,6 +64,12 @@ public class PMCAuth {
     logger.info("Player {} is trying to connect.", player.getUsername());
 
     // put player in limbo
+    // chekc if server is present
+    if (server.getServer("limbo").isEmpty()) {
+      logger.error("Limbo server is not present.");
+      event.setResult(ServerPreConnectEvent.ServerResult.denied());
+      return;
+    }
     RegisteredServer limboServer = server.getServer("limbo").get();
     event.setResult(ServerPreConnectEvent.ServerResult.allowed(limboServer));
 
@@ -93,7 +92,6 @@ public class PMCAuth {
       logger.info("Limbo server started and registered");
     } catch (Exception e) {
       logger.error("Error while starting Limbo: {}", e.getMessage());
-      e.printStackTrace();
     }
     logger.info("{} enabled", this.name);
   }
@@ -103,7 +101,6 @@ public class PMCAuth {
       this.limbo.stop();
     } catch (Exception e) {
       logger.error("Error while stopping Limbo: {}", e.getMessage());
-      e.printStackTrace();
     }
     logger.info("{} disabled", this.name);
   }
