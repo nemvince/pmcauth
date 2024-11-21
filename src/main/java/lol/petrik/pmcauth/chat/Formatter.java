@@ -1,6 +1,8 @@
 package lol.petrik.pmcauth.chat;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
@@ -31,5 +33,12 @@ public class Formatter {
 
   public static Component error(String message) {
     return PREFIX.append(Component.text(message).color(NamedTextColor.RED));
+  }
+
+  public static Component copyToClipboard(String message, String value) {
+    return Component.text(message)
+        .decorate(TextDecoration.UNDERLINED)
+        .hoverEvent(HoverEvent.showText(Component.text("Click to copy")))
+        .clickEvent(ClickEvent.copyToClipboard(value));
   }
 }

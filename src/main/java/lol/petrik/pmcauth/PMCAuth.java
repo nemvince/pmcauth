@@ -130,7 +130,7 @@ public class PMCAuth {
     httpClient.post(config.getHttpUrl() + "/plugin/auth", json).thenAccept(response -> {
       String respBody = response.body();
       HTTPAuthResult result = gson.fromJson(respBody, HTTPAuthResult.class);
-      player.sendMessage(Formatter.info("Kérlek a Discord szerveren küldd el a következő kódot: " + result.code));
+      player.sendMessage(Formatter.info("Kérlek a Discord szerveren küldd el a következő kódot: ").append(Formatter.copyToClipboard(result.code, result.code)));
       logger.info("Player {} has been sent a code: {}", player.getUsername(), result.code);
     });
 
