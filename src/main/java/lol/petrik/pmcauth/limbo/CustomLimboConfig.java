@@ -1,7 +1,10 @@
 package lol.petrik.pmcauth.limbo;
 
 import com.google.gson.Gson;
+import lombok.Getter;
+import lombok.Setter;
 import ua.nanit.limbo.configuration.LimboConfig;
+import ua.nanit.limbo.protocol.NbtMessage;
 import ua.nanit.limbo.server.data.BossBar;
 import ua.nanit.limbo.server.data.InfoForwarding;
 import ua.nanit.limbo.server.data.InfoForwarding.Type;
@@ -11,21 +14,19 @@ import ua.nanit.limbo.server.data.Title;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
-class CustomInfoForwarding {
-  private Type type;
-  private byte[] secretKey;
+import ua.nanit.limbo.util.NbtMessageUtil;
 
-  public Type getType() {
-    return type;
-  }
+class CustomInfoForwarding {
+  @Getter
+  private Type type;
+
+  @Setter
+  private byte[] secretKey;
 
   public void setType(String input) {
     type = Type.valueOf(input);
   }
 
-  public void setSecretKey(byte[] input) {
-    secretKey = input;
-  }
 }
 
 public class CustomLimboConfig implements LimboConfig {
@@ -63,7 +64,7 @@ public class CustomLimboConfig implements LimboConfig {
 
   @Override
   public boolean isUseBossBar() {
-    return false;
+    return true;
   }
 
   @Override
@@ -93,7 +94,13 @@ public class CustomLimboConfig implements LimboConfig {
 
   @Override
   public BossBar getBossBar() {
-    return null;
+    BossBar bossBar = new BossBar();
+    NbtMessage nbtMessage = NbtMessageUtil.create("[{\"text\":\"Petrik\",\"bold\":true,\"color\":\"green\"},{\"text\":\"MC | \",\"bold\":true,\"color\":\"white\"},{\"text\":\"Kérlek lépj be!\",\"color\":\"white\"}]");
+    bossBar.setColor(BossBar.Color.GREEN);
+    bossBar.setText(nbtMessage);
+    bossBar.setDivision(BossBar.Division.DASHES_6);
+    bossBar.setHealth(1.0F);
+    return bossBar;
   }
 
   @Override
