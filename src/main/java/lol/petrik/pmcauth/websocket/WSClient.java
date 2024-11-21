@@ -3,7 +3,8 @@ package lol.petrik.pmcauth.websocket;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 import lol.petrik.pmcauth.PMCAuth;
-import lol.petrik.pmcauth.PlayerLock;
+import lol.petrik.pmcauth.auth.State;
+import lol.petrik.pmcauth.auth.WSAuthResult;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -36,14 +37,14 @@ public class WSClient {
   public void onMessage(String message) {
     Gson gson = new Gson();
     WSAuthResult obj = gson.fromJson(message, WSAuthResult.class);
+    State state = pmcAuth.getPlayerStates().get(obj.mc_username);
+    state.setResult(obj);
 
     logger.info("Received message: {}: {}", obj.mc_username, obj.event);
 
-    pmcAuth.getPlayerStatus().put(obj.mc_username, obj);
-    PlayerLock playerLock = pmcAuth.getWaitingPlayers().get(obj.mc_username);
-    if (playerLock != null) {
-      Lock lock = playerLock.lock();
-      Condition condition = playerLock.condition();
+    if (state.getLock() != null) {
+      Lock lock = state.getLock();
+      Condition condition = state.getCondition();
       lock.lock();
       try {
         condition.signal();

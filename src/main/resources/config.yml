@@ -1,0 +1,11 @@
+file-version: 2
+brand: "PetrikMC"
+backend:
+  host: "host.docker.internal"
+  http: 3000
+  ws: 3001
+  ssl: false
+limbo:
+  port: 60000
+forwarding:
+  secret: ""
